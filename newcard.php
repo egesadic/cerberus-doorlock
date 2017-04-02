@@ -6,28 +6,18 @@
 </style>    
 </head>
 <body>
-<?php
-//Database'e baglanti.
-try {
-    $pdo = new PDO('mysql:host=localhost:3306;dbname=elysium;charset=utf8mb4', 'root', '#sim@sql#'); 
-    $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-    $pdo->exec("SET CHARACTER SET utf8");
-}
-catch (PDOException $err) {  
-            echo "Access Denied";
-            $err->getMessage() . "<br/>";
-            //error olursa diag icin log tut
-            file_put_contents('ErrorLogPDO.txt',$err, FILE_APPEND);  
-  //Baglantiyi test ediyorum, sonra silinecek.
-echo "Connected to MySQL<br>";
+<?php 
+require 'connect.php';
 
 // degiskenleri tanimliyorum
-$cid = $cname = $csurname = "";
+//$cid = $_GET["cardnr"];
+$cid = 'papabless';
+$cname = $csurname = "";
 $cidErr = $cnameErr = $csurnameErr = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if (empty($_POST["name"])) {
-    $cnameErr = "İsim bos birakilamaz.";
+    $cnameErr = "isim bos birakilamaz.";
   } else {
     $cname = test_input($_POST["name"]);
   }
@@ -41,17 +31,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   } else {
     $cid = test_input($_POST["card_id"]);
   }
-  
+}
   //XSS, injection vs.ye karsi "temizleyici fonksiyon"
   function test_input($data) {
   $data = trim($data);
   $data = stripslashes($data);
   $data = htmlspecialchars($data);
   return $data;
-
+  }
+  
  //Karti DB'ye ekliyoruz
- $stmt = $db->prepare("INSERT INTO cards(name,surname,card_id) VALUES(:name,:surname,:card_id)");
- $stmt->execute(array(':field1' => $cname, ':field2' => $csurname, ':field3' => $cid));
+ $stmt = $db->prepare("INSERT INTO cards(name,surname,id) VALUES(:name,:surname,:id)");
+ $stmt->execute(array(':name' => $cname, ':surname' => $csurname, ':id' => $cid));
  $affected_rows = $stmt->rowCount();
  
  //Eklenen kartin bilgilerini teyit ediyoruz
@@ -63,20 +54,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     echo $cid;
     echo "<br>";
     //Cachingle ilgili calismalari da herhalde cumaya kadar koyarım. Bu arada konuyla ilgili arastirmami yapıyor olacagim
-?>        
-<h2>Yeni Kart Sihirbazı</h2>
-<p><span class="error">Hiç bir alanı boş bırakmayınız.</span></p>
+ ?>        
+<h2>Yeni Kart Sihirbazi</h2>
+<p><span class="error">Hic bir alani bos birakmayiniz.</span></p>
 <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">  
-  İsim: <input type="text" name="name">
+ isim: <input type="text" name="name">
   <span class="error"><?php echo $cnameErr;?></span>
   <br><br>
-  Soyisim: <input type="text" name="email">
+  Soyisim: <input type="text" name="surname">
   <span class="error"><?php echo $csurnameErr?></span>
   <br><br>
-  Kart ID: <input type="text" name="website">
+  Kart ID: <input type="text" name="idcard" value=<?php echo $cid;?>>
   <span class="error"><?php echo $cidErr;?></span>
   <br><br>
-  <input type="submit" name="submit" value="Submit">
+  <input type="submit" name="submit" value="Submit"></input>
 </form>  
 </body>
 </html>
