@@ -11,10 +11,30 @@ require 'connect.php';
 
 // degiskenleri tanimliyorum
 //$cid = $_GET["cardnr"];
-$cid = 'papabless';
+
 $cid= $cname = $csurname = "";
 $cidErr = $cnameErr = $csurnameErr = "";
 
+function resetVars(){
+$cid= $cname = $csurname = "";
+$cidErr = $cnameErr = $csurnameErr = "";
+}
+
+//Sayfayi temizliyorum herseye karsi
+resetVars();
+
+//Cache array olusumu
+$cache= array();
+	
+//XSS, injection vs.ye karsi "temizleyici fonksiyon"
+  function test_input($data) {
+  $data = trim($data);
+  $data = stripslashes($data);
+  $data = htmlspecialchars($data);
+  return $data;
+  }
+ 
+ //Form methodu olusturma
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if (empty($_POST["name"])) {
     $cnameErr = "isim bos birakilamaz.";
@@ -30,23 +50,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cidErr = "Lutfen karti okutunuz.";
   } else {
     $cid = test_input($_POST["card_id"]);
+	
 	//Karti DB'ye ekliyoruz
-	 $stmt = $db->prepare("INSERT INTO cards(name,surname,id) 			VALUES		(:name,:surname,:id)");
-	 $stmt->execute(array(':name' => $cname, ':surname' => $csurname, ':id' => 			$cid));
-	 $affected_rows = $stmt->rowCount();
+	 $stmt = $db->prepare("INSERT INTO cards(name,surname,id)VALUES(:name,:surname,:id)");
+	 $stmt->execute(array(':name' => $cname, ':surname' => $csurname, ':id' =>$cid));
+	
+	//Caching
+	 $stmt = $db->prepare("SELECT id FROM cards");
+	 $stmt->execute();
+	 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+	 	$id = $row['id'];
+	 	array_push($cache, $id);
+	 }
+	 file_put_contents('Cache.txt', serialize($cache)); 		 		 
+	 resetVars();
  }
 }
-  //XSS, injection vs.ye karsi "temizleyici fonksiyon"
-  function test_input($data) {
-  $data = trim($data);
-  $data = stripslashes($data);
-  $data = htmlspecialchars($data);
-  return $data;
-  }
-  
- 
- 
- //Eklenen kartin bilgilerini teyit ediyoruz
+
+ //Eklenen kartin bilgilerini teyit ediyoruz, daha sonra daha sofistike bir kod yazilabilir
     echo "<h2>Eklenen kart bilgileri:</h2>";
     echo $cname;
     echo "<br>";
@@ -54,10 +75,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     echo "<br>";
     echo $cid;
     echo "<br>";
-    //Cachingle ilgili calismalari da herhalde cumaya kadar koyarım. Bu arada konuyla ilgili arastirmami yapıyor olacagim
- ?>        
+ ?>
+ 
 <h2>Yeni Kart Sihirbazi</h2>
 <p><span class="error">Hic bir alani bos birakmayiniz.</span></p>
+<?php echo implode("</br>", $cache) ?>
 <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">  
  isim: <input type="text" name="name">
   <span class="error"><?php echo $cnameErr;?></span>

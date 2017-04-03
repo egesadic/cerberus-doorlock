@@ -2,20 +2,26 @@
 require 'connect.php';
 
 //$card = $_GET["cardnr"];
-$card= 'asdfqwer';
+$card= 'yineyanlisid';
 
-//DB'den ID karþýlaþtýrmasýnýn yapýldýðý query
-$stmt = $db->prepare("SELECT * FROM cards WHERE id = ?");
-$stmt->bindParam(1,$card);
-$stmt->execute();
+$isValid = False;
 
-while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-	$id = htmlentities($row['id']);
-}
+$cache = unserialize(file_get_contents('Cache.txt'));
 
-//idler uyuþur ise return #1 veya #0 burdan döndürülecek.
-	if($card == $id)
-		echo '#1';
-	else 
+if(!is_null($card)){
+	foreach ($cache as $id){
+		if ($id == $card)
+		{
+			$isValid = True;
+			echo '#1';
+			break;
+		}		
+	}
+	if(!$isValid)
+	{
 		echo '#0';
+	}
+}
+else 
+	echo'#0';
 ?>
