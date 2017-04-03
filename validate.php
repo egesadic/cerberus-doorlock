@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html>
-<body>
 <?php
 require 'connect.php';
 
 //$card = $_GET["cardnr"];
-$card= '1TS45M';
+$card= 'asdfqwer';
 
 //DB'den ID karþýlaþtýrmasýnýn yapýldýðý query
 $stmt = $db->prepare("SELECT * FROM cards WHERE id = ?");
@@ -18,8 +15,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 
 //idler uyuþur ise return #1 veya #0 burdan döndürülecek.
 	if($card == $id)
-		echo'#1';
-	else echo '#0';
+		echo '#1';
+	else 
+		echo '#0';
 ?>
-</body>
-</html>

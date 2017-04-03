@@ -2,7 +2,7 @@
 $config['db'] = array(
 		'host'      => 'localhost:3306',
 		'username'  => 'root',
-		'password'  => '#sim@sql#',
+		'password'  => 'cvbnm',
 		'dbname'    => 'elysium'
 );
 	try {
@@ -11,8 +11,6 @@ $config['db'] = array(
 		$db = new PDO('mysql:host=' .$config['db']['host']. ';dbname=' .$config['db']['dbname'], $config['db']['username'], $config['db']['password']);
 		$db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		$db->exec("SET CHARACTER SET utf8");
-		//Baglantiyi test ediyorum, sonra silinecek.
-		echo "Connected to MySQL<br>";
 	}
 	catch (PDOException $err) {
 		echo "Access Denied";

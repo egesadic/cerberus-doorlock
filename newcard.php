@@ -12,7 +12,7 @@ require 'connect.php';
 // degiskenleri tanimliyorum
 //$cid = $_GET["cardnr"];
 $cid = 'papabless';
-$cname = $csurname = "";
+$cid= $cname = $csurname = "";
 $cidErr = $cnameErr = $csurnameErr = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -26,11 +26,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   } else {
     $csurname = test_input($_POST["surname"]);
   }
-  if (empty($_POST["card_id"])) {
+  if (!isset($_POST["card_id"])) {
     $cidErr = "Lutfen karti okutunuz.";
   } else {
     $cid = test_input($_POST["card_id"]);
-  }
+	//Karti DB'ye ekliyoruz
+	 $stmt = $db->prepare("INSERT INTO cards(name,surname,id) 			VALUES		(:name,:surname,:id)");
+	 $stmt->execute(array(':name' => $cname, ':surname' => $csurname, ':id' => 			$cid));
+	 $affected_rows = $stmt->rowCount();
+ }
 }
   //XSS, injection vs.ye karsi "temizleyici fonksiyon"
   function test_input($data) {
@@ -40,10 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   return $data;
   }
   
- //Karti DB'ye ekliyoruz
- $stmt = $db->prepare("INSERT INTO cards(name,surname,id) VALUES(:name,:surname,:id)");
- $stmt->execute(array(':name' => $cname, ':surname' => $csurname, ':id' => $cid));
- $affected_rows = $stmt->rowCount();
+ 
  
  //Eklenen kartin bilgilerini teyit ediyoruz
     echo "<h2>Eklenen kart bilgileri:</h2>";
@@ -64,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   Soyisim: <input type="text" name="surname">
   <span class="error"><?php echo $csurnameErr?></span>
   <br><br>
-  Kart ID: <input type="text" name="idcard" value=<?php echo $cid;?>>
+  Kart ID: <input type="text" name="card_id" value=<?php echo $cid;?>>
   <span class="error"><?php echo $cidErr;?></span>
   <br><br>
   <input type="submit" name="submit" value="Submit"></input>
