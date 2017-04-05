@@ -1,8 +1,6 @@
 <?php
-require 'connect.php';
-
 //$card = $_GET["cardnr"];
-$card= 'yineyanlisid';
+$card= 'zsexdr';
 
 $isValid = False;
 
@@ -23,5 +21,7 @@ if(!is_null($card)){
 	}
 }
 else 
+{
 	echo'#0';
+}
 ?>

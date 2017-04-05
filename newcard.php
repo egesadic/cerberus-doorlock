@@ -1,16 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/HTML; charset=utf-8" />
 <style>
 .error {color: #FF0000;}
 </style>    
 </head>
 <body>
 <?php 
-require 'connect.php';
+require 'database.class.php';
+
+$config = parse_ini_file('config.ini');
+
+define("DB_HOST", $config['DB_HOST']);
+define("DB_USER", $config['DB_USER']);
+define("DB_PASS", $config['DB_PASS']);
+define("DB_NAME", $config['DB_NAME']);
 
 // degiskenleri tanimliyorum
 //$cid = $_GET["cardnr"];
+
+$database = new Database();
 
 $cid= $cname = $csurname = "";
 $cidErr = $cnameErr = $csurnameErr = "";
@@ -52,18 +62,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cid = test_input($_POST["card_id"]);
 	
 	//Karti DB'ye ekliyoruz
-	 $stmt = $db->prepare("INSERT INTO cards(name,surname,id)VALUES(:name,:surname,:id)");
-	 $stmt->execute(array(':name' => $cname, ':surname' => $csurname, ':id' =>$cid));
+	
+    $database->query('INSERT INTO cards(name,surname,card_id)VALUES(:name,:surname,:card_id)');
+	$database->bind(':name', $cname);
+	$database->bind(':surname',$csurname);
+	$database->bind(':card_id', $cid);
+	$database->execute();
 	
 	//Caching
-	 $stmt = $db->prepare("SELECT id FROM cards");
-	 $stmt->execute();
-	 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-	 	$id = $row['id'];
-	 	array_push($cache, $id);
-	 }
-	 file_put_contents('Cache.txt', serialize($cache)); 		 		 
-	 resetVars();
+	 $database->query("SELECT card_id FROM cards");
+	 $cache = $database->resultset();
+	 	/* $id = $row['card_id'];
+	 	array_push($cache, $id); */
+	 file_put_contents('Cache.txt', '');
+	 file_put_contents('Cache.txt', serialize($cache)); 		 		 	
  }
 }
 
@@ -74,7 +86,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     echo $csurname;
     echo "<br>";
     echo $cid;
-    echo "<br>";
+    echo "<br>"; 
+    
+    //resetVars();
  ?>
  
 <h2>Yeni Kart Sihirbazi</h2>
