@@ -1,5 +1,6 @@
 <?php
 class Database{
+	
 	private $host      = DB_HOST;
 	private $user      = DB_USER;
 	private $pass      = DB_PASS;
@@ -27,6 +28,13 @@ class Database{
 			echo 'Access Denied';
 			file_put_contents('ErrorLogPDO.txt',$e, FILE_APPEND);
 		}
+	}
+	
+	public function cleanInput($data){
+		$data = trim($data);
+		$data = stripslashes($data);
+		$data = htmlspecialchars($data);
+		return $data;
 	}
 	
 	public function query($query){
@@ -59,6 +67,14 @@ class Database{
 	public function resultset(){
 		$this->execute();
 		return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+	
+	public function fetchAll(){
+		return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+	
+	public function fetchSingle(){
+		return $this->stmt->fetch(PDO::FETCH_ASSOC);
 	}
 	
 	public function single(){

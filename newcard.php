@@ -36,30 +36,23 @@ resetVars();
 //Cache array olusumu
 $cache= array();
 	
-//XSS, injection vs.ye karsi "temizleyici fonksiyon"
-  function test_input($data) {
-  $data = trim($data);
-  $data = stripslashes($data);
-  $data = htmlspecialchars($data);
-  return $data;
-  }
- 
+
  //Form methodu olusturma
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if (empty($_POST["name"])) {
     $cnameErr = "isim bos birakilamaz.";
   } else {
-    $cname = test_input($_POST["name"]);
+    $cname = cleanInput($_POST["name"]);
   }
   if (empty($_POST["surname"])) {
     $csurnameErr = "Bos birakilamaz";
   } else {
-    $csurname = test_input($_POST["surname"]);
+    $csurname = cleanInput($_POST["surname"]);
   }
   if (!isset($_POST["card_id"])) {
     $cidErr = "Lutfen karti okutunuz.";
   } else {
-    $cid = test_input($_POST["card_id"]);
+    $cid = cleanInput($_POST["card_id"]);
 	
 	//Karti DB'ye ekliyoruz
 	
@@ -71,9 +64,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	
 	//Caching
 	 $database->query("SELECT card_id FROM cards");
-	 $cache = $database->resultset();
-	 	/* $id = $row['card_id'];
-	 	array_push($cache, $id); */
+	 $database->execute();
+	 while($row = $database->fetchSingle()){
+	 	$id = $row['card_id'];
+	 	array_push($cache, $id);
+	 }
 	 file_put_contents('Cache.txt', '');
 	 file_put_contents('Cache.txt', serialize($cache)); 		 		 	
  }
@@ -90,7 +85,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     //resetVars();
  ?>
- 
 <h2>Yeni Kart Sihirbazi</h2>
 <p><span class="error">Hic bir alani bos birakmayiniz.</span></p>
 <?php echo implode("</br>", $cache) ?>
