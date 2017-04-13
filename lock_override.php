@@ -8,11 +8,6 @@
 </style>
 </head>
 <body>
-<script>
-function clearPermissions()
-	var Table = document.getElementById("permission-table");
-	Table.innerHTML = "";  
-</script>
 <?php
 require 'database.class.php';
 
@@ -28,36 +23,36 @@ $database = new Database ();
 if (isset ( $_POST ['formSubmit'] )) {
 	$permit = $_POST ['formDisableTime'];
 	$errorMessage = "";
-	
+
 	if (empty ( $permit )) {
 		$errorMessage = "<li>Lütfen bir zaman dilimi seçiniz.</li>";
 	}
-	
+
 	if ($errorMessage != "") {
 		echo ("<p>Bir sorun oluştu:</p>\n");
 		echo ("<ul>" . $errorMessage . "</ul>\n");
-	} 
-	else 
+	}
+	else
 	{
-		
+
 		$database->query('TRUNCATE table entries');
 		$database->execute();
-		
+
 		$expiry = time()+$permit;
-		
+
 		$database->query ( 'INSERT INTO entries(permit)VALUES(:permit)' );
 		$database->bind ( ':permit', $expiry );
 		$database->execute ();
-		
+
 		$permission = array ();
-		
-		array_push ( $permission, $permit );
+
+		array_push ( $permission, $expiry );
 		file_put_contents ( 'Permissions.txt', '' );
 		file_put_contents ( 'Permissions.txt', serialize ( $permission ) );
 	}
 }
-		
-	
+
+
 ?>
 <h2>Kart Kontrolünü Devre Dışı Bırak</h2>
 	<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>"
@@ -100,18 +95,18 @@ if (isset ( $_POST ['formSubmit'] )) {
             </table>
             <br>
 <?php
-  if (!empty($_POST['act'])) 
+  if (!empty($_POST['act']))
   {
     $database->query('TRUNCATE table entries');
     $database->execute();
     file_put_contents ( 'Permissions.txt', '' );
 
-  } 
-  else 
+  }
+  else
   {
 ?>
 <form action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?> method="post">
-  <input onclick="clearPermissions()" type="Submit" name="act" value="Bütün İzinleri Kaldır">
+  <input type="Submit" name="act" value="Bütün İzinleri Kaldır">
 </form>
 <?php
   }

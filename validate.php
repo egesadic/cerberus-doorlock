@@ -1,6 +1,6 @@
 <?php
-// $card = $_GET["cardnr"];
-$card = 'notthetruth';
+$card = $_GET["cardnr"];
+//$card = 'notthetruth';
 $time = time ();
 $isValid = False;
 
@@ -9,7 +9,7 @@ $permission = unserialize ( file_get_contents ( 'Permissions.txt' ) );
 $permit = intval ( $permission [0] );
 
 if (! is_null ( $card )) {
-	if ($time < $permit || isset($permit)) 
+	if ($time < $permit && isset($permit)) 
 	{
 		echo '#1';
 	} 

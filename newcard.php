@@ -4,10 +4,10 @@
 <meta http-equiv="Content-Type" content="text/HTML; charset=utf-8" />
 <style>
 .error {color: #FF0000;}
-</style>    
+</style>
 </head>
 <body>
-<?php 
+<?php
 require 'database.class.php';
 
 $config = parse_ini_file('config.ini');
@@ -30,12 +30,19 @@ $cid= $cname = $csurname = "";
 $cidErr = $cnameErr = $csurnameErr = "";
 }
 
+function cleanInput($data){
+	$data = trim($data);
+	$data = stripslashes($data);
+	$data = htmlspecialchars($data);
+	return $data;
+}
+
 //Sayfayi temizliyorum herseye karsi
 resetVars();
 
 //Cache array olusumu
 $cache= array();
-	
+
 
  //Form methodu olusturma
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -53,15 +60,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cidErr = "Lutfen karti okutunuz.";
   } else {
     $cid = cleanInput($_POST["card_id"]);
-	
+
 	//Karti DB'ye ekliyoruz
 	
-    $database->query('INSERT INTO cards(name,surname,card_id)VALUES(:name,:surname,:card_id)');
+  $database->query('INSERT INTO cards(name,surname,card_id)VALUES(:name,:surname,:card_id)');
 	$database->bind(':name', $cname);
 	$database->bind(':surname',$csurname);
 	$database->bind(':card_id', $cid);
 	$database->execute();
-	
+
 	//Caching
 	 $database->query("SELECT card_id FROM cards");
 	 $database->execute();
@@ -70,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	 	array_push($cache, $id);
 	 }
 	 file_put_contents('Cache.txt', '');
-	 file_put_contents('Cache.txt', serialize($cache)); 		 		 	
+	 file_put_contents('Cache.txt', serialize($cache));
  }
 }
 
@@ -81,24 +88,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     echo $csurname;
     echo "<br>";
     echo $cid;
-    echo "<br>"; 
-    
-    //resetVars();
+    echo "<br>";
+
+    resetVars();
  ?>
 <h2>Yeni Kart Sihirbazi</h2>
 <p><span class="error">Hic bir alani bos birakmayiniz.</span></p>
-<?php echo implode("</br>", $cache) ?>
-<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">  
+<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
  isim: <input type="text" name="name">
   <span class="error"><?php echo $cnameErr;?></span>
   <br><br>
   Soyisim: <input type="text" name="surname">
   <span class="error"><?php echo $csurnameErr?></span>
   <br><br>
-  Kart ID: <input type="text" name="card_id" value=<?php echo $cid;?>>
+  Kart ID: <input type="text" name="card_id">
   <span class="error"><?php echo $cidErr;?></span>
   <br><br>
   <input type="submit" name="submit" value="Submit"></input>
-</form>  
+</form>
 </body>
 </html>
